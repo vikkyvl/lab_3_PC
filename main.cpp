@@ -7,6 +7,8 @@
 int main()
 {
     srand(time(NULL));
+
+    ThreadPool pool;
     
     return 0;
 }
