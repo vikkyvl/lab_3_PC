@@ -21,6 +21,7 @@ public:
     Task pop();
     void clear();
     bool empty();
+    void notifyAll();
     //int size();
     int getTotalExecutionTime() const;
 };

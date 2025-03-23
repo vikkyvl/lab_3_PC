@@ -1,13 +1,15 @@
 #include "task.h"
+#include "random_number.h"
 #include <ctime>
 #include <cstdlib>
+#include <random>
 
 std::atomic<int> Task::counter(0);
 
 Task::Task()
 {
     id = counter++;
-    executionTime = MIN + (rand() % (MAX - MIN + 1));
+    executionTime = RandomNumber::getRandomNumber(MIN, MAX);
 }
 
 int Task::getId() const

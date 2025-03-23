@@ -64,10 +64,28 @@ void ThreadPool::add_task(const Task& task)
     }
 }
 
+void ThreadPool::pause()
+{
+    isPaused.store(true);
+}
+
+void ThreadPool::resume()
+{
+    isPaused.store(false);
+    control_cv.notify_all();
+}
+
 void ThreadPool::stop()
 {
     isStopped.store(true);
     control_cv.notify_all();
+
+    for (auto& queue : queues)
+    {
+        queue.clear();
+        queue.notifyAll();
+    }
+
     for (auto& thread : working_threads)
     {
         if(thread.joinable())

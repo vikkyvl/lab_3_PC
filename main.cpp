@@ -1,6 +1,4 @@
 #include <iostream>
-#include <ctime>
-#include <cstdlib>
 #include <vector>
 #include <thread>
 #include "generator_thread.h"
@@ -11,8 +9,6 @@
 
 int main()
 {
-    srand(time(NULL));
-
     ThreadPool pool;
     pool.start();
 

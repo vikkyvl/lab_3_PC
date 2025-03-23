@@ -28,6 +28,11 @@ void Queue::clear()
     }
 }
 
+void Queue::notifyAll()
+{
+    queue_notifier.notify_all();
+}
+
 int Queue::getTotalExecutionTime() const
 {
     return totalExecutionTime.load();
@@ -38,4 +43,5 @@ bool Queue::empty()
     std::lock_guard<std::mutex> lock(queue_mutex);
     return task_queue.empty();
 }
+
 

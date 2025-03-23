@@ -26,8 +26,8 @@ public:
     void start();
     void serveQueue(int queueIndex, int threadId);
     void add_task(const Task& task);
-    // void pause();
-    // void resume();
+    void pause();
+    void resume();
     void stop();
 };
 

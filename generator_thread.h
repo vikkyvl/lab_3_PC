@@ -10,6 +10,7 @@ private:
     ThreadPool& pool;
     std::thread task_thread;
     std::atomic<bool> running{true};
+    int delay = 0;
 public:
     explicit GeneratorThread(ThreadPool& p);
     ~GeneratorThread();

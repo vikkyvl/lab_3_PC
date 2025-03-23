@@ -1,5 +1,7 @@
 #include "generator_thread.h"
+#include "random_number.h"
 #include <chrono>
+#include <ctime>
 #include <cstdlib>
 
 #define DELAY_MIN 1
@@ -25,7 +27,8 @@ void GeneratorThread::run()
         {
             Task task;
             pool.add_task(task);
-            std::this_thread::sleep_for(std::chrono::seconds(DELAY_MIN + (rand() % (DELAY_MAX - DELAY_MIN + 1))));
+            delay = RandomNumber::getRandomNumber(DELAY_MIN, DELAY_MAX);
+            std::this_thread::sleep_for(std::chrono::seconds(delay));
         }
     });
 }
