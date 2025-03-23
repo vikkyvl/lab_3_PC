@@ -18,6 +18,4 @@ public:
     int getExecutionTime() const;
 };
 
-
-
 #endif //TASK_H

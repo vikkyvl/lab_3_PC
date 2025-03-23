@@ -1,5 +1,7 @@
 #ifndef QUEUE_H
 #define QUEUE_H
+#include <atomic>
+#include <mutex>
 #include <condition_variable>
 #include <queue>
 #include "task.h"
@@ -13,14 +15,14 @@ private:
     std::condition_variable queue_notifier;
 public:
     Queue() = default;
-    ~Queue() {clear();};
+    ~Queue() { clear(); };
 
-    Task pop();
     void push(Task task);
+    Task pop();
     void clear();
     bool empty();
-    int size();
-    int getTotalExecutionTime();
+    //int size();
+    int getTotalExecutionTime() const;
 };
 
 #endif //QUEUE_H

@@ -4,7 +4,8 @@
 
 std::atomic<int> Task::counter(0);
 
-Task::Task() {
+Task::Task()
+{
     id = counter++;
     executionTime = MIN + (rand() % (MAX - MIN + 1));
 }

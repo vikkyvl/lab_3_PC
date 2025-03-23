@@ -15,6 +15,7 @@ private:
     std::vector<std::thread> working_threads;
     std::atomic<bool> isPaused{false};
     std::atomic<bool> isStopped{false};
+    static std::mutex output_mutex;
     std::mutex control_mutex;
     std::condition_variable control_cv;
 
@@ -23,7 +24,8 @@ public:
     ~ThreadPool();
 
     void start();
-    void add_task(Task& task);
+    void serveQueue(int queueIndex, int threadId);
+    void add_task(const Task& task);
     // void pause();
     // void resume();
     void stop();
