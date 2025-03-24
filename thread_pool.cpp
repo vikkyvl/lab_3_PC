@@ -4,7 +4,6 @@
 #define THREADS_NUM 2
 #define QUEUES_NUM 3
 
-std::mutex ThreadPool::output_mutex;
 
 ThreadPool::ThreadPool(): queues(QUEUES_NUM) {}
 
@@ -31,16 +30,25 @@ void ThreadPool::serveQueue(int queueIndex, int threadId)
             control_cv.wait(lock,[this](){return !isPaused || isStopped.load();});
         }
 
-        Task task = queues[queueIndex].pop();
+        Task task = queues[queueIndex].pop(threadId);
         {
             std::lock_guard<std::mutex> lock(output_mutex);
             std::cout << "Thread " << threadId << " executing Task #"
                       << task.getId() << " (Duration: " << task.getExecutionTime() << " sec)\n";
         }
-        std::this_thread::sleep_for(std::chrono::seconds(task.getExecutionTime()));
+
+        int delay = task.getExecutionTime();
+        std::this_thread::sleep_for(std::chrono::seconds(delay));
+
+        {
+            std::lock_guard<std::mutex> lock(output_mutex);
+            std::cout << "Thread " << threadId << " finished Task #" << task.getId() << std::endl;
+        }
+
+        totalTasksExecuted.fetch_add(1);
+        totalExecutionTime.fetch_add(delay);
     }
 }
-
 
 void ThreadPool::add_task(const Task& task)
 {
@@ -62,6 +70,7 @@ void ThreadPool::add_task(const Task& task)
         std::lock_guard<std::mutex> lock(output_mutex);
         std::cout << "Task #" << task.getId() << "(Duration: " << task.getExecutionTime() << ") added to queue " << queueIndex << std::endl;
     }
+    totalTasksAdded.fetch_add(1);
 }
 
 void ThreadPool::pause()
@@ -80,11 +89,11 @@ void ThreadPool::stop()
     isStopped.store(true);
     control_cv.notify_all();
 
-    for (auto& queue : queues)
-    {
-        queue.clear();
-        queue.notifyAll();
-    }
+    // for (auto& queue : queues)
+    // {
+    //     queue.clear();
+    //     queue.notifyAll();
+    // }
 
     for (auto& thread : working_threads)
     {
@@ -93,5 +102,24 @@ void ThreadPool::stop()
             thread.join();
         }
     }
+}
+
+void ThreadPool::getThreadPoolStatistics() const
+{
+    std::cout << "\n* Results *" << std::endl;
+    std::cout << "\nTasks added: " << totalTasksAdded.load() << std::endl;
+    std::cout << "Tasks executed: " << totalTasksExecuted.load() << "\n";
+
+    if (totalTasksExecuted > 0)
+    {
+        std::cout << "Average task execution time: " << (double)totalExecutionTime.load() / totalTasksExecuted.load() << " s\n";
+    }
+
+    std::cout << "\n--- Queue Statistics ---\n";
+    for (int i = 0; i < queues.size(); ++i)
+    {
+        queues[i].getQueueStatistics(i);
+    }
+
 }
 

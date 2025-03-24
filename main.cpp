@@ -19,7 +19,13 @@ int main()
         task_threads.back()->run();
     }
 
-    std::this_thread::sleep_for(std::chrono::seconds(5));
+    std::this_thread::sleep_for(std::chrono::seconds(2));
+
+    pool.pause();
+    std::this_thread::sleep_for(std::chrono::seconds(2));
+    pool.resume();
+
+    std::this_thread::sleep_for(std::chrono::seconds(2));
 
     for (int i = 0; i < NUM_THREADS; ++i)
     {
@@ -28,6 +34,7 @@ int main()
     }
 
     pool.stop();
+    pool.getThreadPoolStatistics();
 
     return 0;
 }

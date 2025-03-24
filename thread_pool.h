@@ -7,7 +7,6 @@
 #include <condition_variable>
 #include "queue.h"
 
-
 class ThreadPool
 {
 private:
@@ -15,10 +14,13 @@ private:
     std::vector<std::thread> working_threads;
     std::atomic<bool> isPaused{false};
     std::atomic<bool> isStopped{false};
-    static std::mutex output_mutex;
     std::mutex control_mutex;
     std::condition_variable control_cv;
 
+    std::mutex output_mutex;
+    std::atomic<int> totalTasksAdded{0};
+    std::atomic<int> totalTasksExecuted{0};
+    std::atomic<long long> totalExecutionTime{0};
 public:
     ThreadPool();
     ~ThreadPool();
@@ -29,6 +31,8 @@ public:
     void pause();
     void resume();
     void stop();
+    void stopNow();
+    void getThreadPoolStatistics() const;
 };
 
 

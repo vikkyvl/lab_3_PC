@@ -1,3 +1,5 @@
+#include <iostream>
+#include <iomanip>
 #include "queue.h"
 
 void Queue::push(const Task task)
@@ -8,12 +10,23 @@ void Queue::push(const Task task)
     queue_notifier.notify_one();
 }
 
-Task Queue::pop()
+Task Queue::pop(int threadIndex)
 {
     std::unique_lock<std::mutex> lock(queue_mutex);
-    queue_notifier.wait(lock, [this] {return !task_queue.empty();});
+
+    auto start = std::chrono::steady_clock::now();
+    queue_notifier.wait(lock, [this] { return !task_queue.empty(); });
+    auto end = std::chrono::steady_clock::now();
+
+    std::chrono::duration<double> waitTime = end - start;
+    threadWaitTimes[threadIndex] += waitTime.count();
+
     Task task = task_queue.front();
     task_queue.pop();
+
+    sumQueueLength.fetch_add(task_queue.size());
+    numMeasurements.fetch_add(1);
+
     totalExecutionTime.fetch_sub(task.getExecutionTime());
     return task;
 }
@@ -21,7 +34,7 @@ Task Queue::pop()
 void Queue::clear()
 {
     std::lock_guard<std::mutex> lock(queue_mutex);
-    while(!task_queue.empty())
+    while(!empty())
     {
         totalExecutionTime.fetch_sub(task_queue.front().getExecutionTime());
         task_queue.pop();
@@ -40,8 +53,28 @@ int Queue::getTotalExecutionTime() const
 
 bool Queue::empty()
 {
-    std::lock_guard<std::mutex> lock(queue_mutex);
     return task_queue.empty();
+}
+
+double Queue::getAverageQueueLength() const
+{
+    if (numMeasurements == 0)
+    {
+        return 0.0;
+    }
+    return static_cast<double>(sumQueueLength.load()) / numMeasurements.load();
+}
+
+void Queue::getQueueStatistics(int queueIndex) const
+{
+    std::cout << "\nQueue " << queueIndex << ":\n";
+    std::cout << "Average length: " << getAverageQueueLength() << "\n";
+    std::cout << "Worker thread wait times:\n";
+    for (const auto& entry : threadWaitTimes)
+    {
+        std::cout << std::fixed << std::setprecision(2);
+        std::cout << "Thread " << entry.first << ", total wait time: " << entry.second << " s\n";
+    }
 }
 
 
