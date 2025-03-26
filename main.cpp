@@ -19,13 +19,13 @@ int main()
         task_threads.back()->run();
     }
 
-    std::this_thread::sleep_for(std::chrono::seconds(2));
+    std::this_thread::sleep_for(std::chrono::seconds(60));
 
-    pool.pause();
-    std::this_thread::sleep_for(std::chrono::seconds(2));
-    pool.resume();
-
-    std::this_thread::sleep_for(std::chrono::seconds(2));
+    // pool.pause();
+    // std::this_thread::sleep_for(std::chrono::seconds(30));
+    // pool.resume();
+    //
+    // std::this_thread::sleep_for(std::chrono::seconds(2));
 
     for (int i = 0; i < NUM_THREADS; ++i)
     {
@@ -33,7 +33,7 @@ int main()
         delete task_threads[i];
     }
 
-    pool.stop();
+    pool.stopNow();
     pool.getThreadPoolStatistics();
 
     return 0;

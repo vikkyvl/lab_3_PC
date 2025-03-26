@@ -3,7 +3,6 @@
 #include "thread_pool.h"
 #include <thread>
 
-
 class GeneratorThread
 {
 private:
@@ -18,6 +17,5 @@ public:
     void run();
     void stop();
 };
-
 
 #endif //GENERATOR_THREAD_H

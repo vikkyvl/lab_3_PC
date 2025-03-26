@@ -17,7 +17,7 @@ private:
 
     std::atomic<int> sumQueueLength{0};
     std::atomic<int> numMeasurements{0};
-    std::unordered_map<int, long long> threadWaitTimes;
+    std::unordered_map<int, double> threadWaitTimes;
 
 public:
     Queue() = default;

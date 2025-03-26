@@ -1,8 +1,6 @@
 #include "generator_thread.h"
 #include "random_number.h"
 #include <chrono>
-#include <ctime>
-#include <cstdlib>
 
 #define DELAY_MIN 1
 #define DELAY_MAX 5

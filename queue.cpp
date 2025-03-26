@@ -14,12 +14,12 @@ Task Queue::pop(int threadIndex)
 {
     std::unique_lock<std::mutex> lock(queue_mutex);
 
-    auto start = std::chrono::steady_clock::now();
+    auto start = std::chrono::high_resolution_clock::now();
     queue_notifier.wait(lock, [this] { return !task_queue.empty(); });
-    auto end = std::chrono::steady_clock::now();
+    auto end = std::chrono::high_resolution_clock::now();
 
-    std::chrono::duration<double> waitTime = end - start;
-    threadWaitTimes[threadIndex] += waitTime.count();
+    auto waitTime = std::chrono::duration_cast<std::chrono::nanoseconds>(end - start);
+    threadWaitTimes[threadIndex] += waitTime.count() * 1e-9;
 
     Task task = task_queue.front();
     task_queue.pop();
@@ -72,7 +72,6 @@ void Queue::getQueueStatistics(int queueIndex) const
     std::cout << "Worker thread wait times:\n";
     for (const auto& entry : threadWaitTimes)
     {
-        std::cout << std::fixed << std::setprecision(2);
         std::cout << "Thread " << entry.first << ", total wait time: " << entry.second << " s\n";
     }
 }

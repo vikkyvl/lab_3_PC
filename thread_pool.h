@@ -20,7 +20,7 @@ private:
     std::mutex output_mutex;
     std::atomic<int> totalTasksAdded{0};
     std::atomic<int> totalTasksExecuted{0};
-    std::atomic<long long> totalExecutionTime{0};
+    std::atomic<double> totalExecutionTime{0};
 public:
     ThreadPool();
     ~ThreadPool();
@@ -34,7 +34,5 @@ public:
     void stopNow();
     void getThreadPoolStatistics() const;
 };
-
-
 
 #endif //THREAD_POOL_H

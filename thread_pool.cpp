@@ -27,7 +27,7 @@ void ThreadPool::serveQueue(int queueIndex, int threadId)
     {
         {
             std::unique_lock<std::mutex> lock(control_mutex);
-            control_cv.wait(lock,[this](){return !isPaused || isStopped.load();});
+            control_cv.wait(lock,[this](){return !isPaused.load() || isStopped.load();});
         }
 
         Task task = queues[queueIndex].pop(threadId);
@@ -76,12 +76,18 @@ void ThreadPool::add_task(const Task& task)
 void ThreadPool::pause()
 {
     isPaused.store(true);
+
+    // std::lock_guard<std::mutex> lock(output_mutex);
+    // std::cout << "ThreadPool is paused." << std::endl;
 }
 
 void ThreadPool::resume()
 {
     isPaused.store(false);
     control_cv.notify_all();
+
+    // std::lock_guard<std::mutex> lock(output_mutex);
+    // std::cout << "ThreadPool is resumed." << std::endl;
 }
 
 void ThreadPool::stop()
@@ -89,11 +95,10 @@ void ThreadPool::stop()
     isStopped.store(true);
     control_cv.notify_all();
 
-    // for (auto& queue : queues)
-    // {
-    //     queue.clear();
-    //     queue.notifyAll();
-    // }
+    for (auto& queue : queues)
+    {
+        queue.notifyAll();
+    }
 
     for (auto& thread : working_threads)
     {
@@ -104,6 +109,29 @@ void ThreadPool::stop()
     }
 }
 
+void ThreadPool::stopNow()
+{
+    isStopped.store(true);
+    control_cv.notify_all();
+
+    for (auto& queue : queues)
+    {
+        queue.clear();
+        queue.notifyAll();
+    }
+
+    for (auto& thread : working_threads)
+    {
+        if(thread.joinable())
+        {
+            thread.join();
+        }
+    }
+
+    // std::lock_guard<std::mutex> lock(output_mutex);
+    // std::cout << "Thread pool stopped immediately" << std::endl;
+}
+
 void ThreadPool::getThreadPoolStatistics() const
 {
     std::cout << "\n* Results *" << std::endl;
@@ -112,14 +140,13 @@ void ThreadPool::getThreadPoolStatistics() const
 
     if (totalTasksExecuted > 0)
     {
-        std::cout << "Average task execution time: " << (double)totalExecutionTime.load() / totalTasksExecuted.load() << " s\n";
+        std::cout << "Average task execution time: " << totalExecutionTime.load() / totalTasksExecuted.load() << " s\n";
     }
 
     std::cout << "\n--- Queue Statistics ---\n";
-    for (int i = 0; i < queues.size(); ++i)
+    for (int i = 0; i < queues.size(); i++)
     {
         queues[i].getQueueStatistics(i);
     }
-
 }
 
