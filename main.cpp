@@ -19,7 +19,7 @@ int main()
         task_threads.back()->run();
     }
 
-    std::this_thread::sleep_for(std::chrono::seconds(60));
+    std::this_thread::sleep_for(std::chrono::seconds(5));
 
     // pool.pause();
     // std::this_thread::sleep_for(std::chrono::seconds(30));
@@ -33,7 +33,7 @@ int main()
         delete task_threads[i];
     }
 
-    pool.stopNow();
+    pool.stop();
     pool.getThreadPoolStatistics();
 
     return 0;

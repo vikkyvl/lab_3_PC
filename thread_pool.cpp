@@ -30,6 +30,11 @@ void ThreadPool::serveQueue(int queueIndex, int threadId)
             control_cv.wait(lock,[this](){return !isPaused.load() || isStopped.load();});
         }
 
+        if (isStopped.load())
+        {
+            break;
+        }
+
         Task task = queues[queueIndex].pop(threadId);
         {
             std::lock_guard<std::mutex> lock(output_mutex);
